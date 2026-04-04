@@ -176,7 +176,7 @@ export default function TxFeed({ txFeed }) {
   }, [phase]);
 
   return (
-    <div className="opacity-80" style={S.txFeed}>
+    <div className="opacity-80 absolute w-full h-full overflow-hidden" style={S.txFeed}>
       <style>{css}</style>
 
       {/* hash waterfall bg */}
