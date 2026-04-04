@@ -446,26 +446,29 @@ export const S = {
 
   // ── Badge ─────────────────────────────────────────────────────────────────
   badge: {
-    position: "fixed",
-    bottom: 24,
-    right: 24,
-    zIndex: 100,
-    background: "rgba(1,7,4,0.92)",
-    border: "1px solid rgba(0,200,100,0.18)",
-    borderRadius: 4,
-    padding: "13px 17px",
-    backdropFilter: "blur(12px)",
-    display: "flex",
-    flexDirection: "column",
-    gap: 7,
-    minWidth: 220,
-  },
+  position: "fixed",
+  top: "530px",  
+   // 👈 control vertical position from top
+  right: "20px",
+  zIndex: 100,
+  background: "rgba(1,7,4,0.92)",
+  border: "1px solid rgba(0,200,100,0.18)",
+  borderRadius: 4,
+  padding: "5px 2px",
+  backdropFilter: "blur(12px)",
+  display: "flex",
+  flexDirection: "column",
+  gap: 3,
+  minWidth: 220,
+  
+},
+
 
   badgeTitle: {
-    fontSize: ".58rem",
+    fontSize: ".10rem",
     color: "#00c864",
-    fontWeight: 700,
-    letterSpacing: "3px",
+    fontWeight: 200,
+    letterSpacing: "0.18em",
   },
 
   badgeRow: {

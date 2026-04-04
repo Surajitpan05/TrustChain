@@ -13,6 +13,8 @@ import ChainStatusBadge from "./components/ChainStatusBadge.jsx";
 import Admin from "./components/Admin";
 import ProductDashboard from "./components/ProductDashboard";
 
+import FooterHome from "./components/FooterHome.jsx";
+
 /* =========================
    LAYOUT COMPONENT
 ========================= */
@@ -21,6 +23,7 @@ function Layout({ canvasRef, txFeed }) {
 
   // Hide Navbar only for product dashboard
   const hideNavbar = location.pathname.startsWith("/product");
+  const hideFooter = location.pathname.startsWith("/product");
 
   return (
     <div style={S.root}>
@@ -53,7 +56,9 @@ function Layout({ canvasRef, txFeed }) {
 
         {/* Product Dashboard */}
         <Route path="/product/:id" element={<ProductDashboard />} />
+        
       </Routes>
+      {!hideFooter && <FooterHome />}
     </div>
   );
 }
