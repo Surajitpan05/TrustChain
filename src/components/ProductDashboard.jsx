@@ -777,25 +777,27 @@ console.log(data);
 const note = atob(data.transaction.note);
 
 const product = JSON.parse(note);
+let backendRisk = null;
 
+try {
+  const res = await fetch(`https://trustchain-backend-zi7z.onrender.com/batch/${product.batchId}`);
+  const data = await res.json();
+  backendRisk = data.risk;
+  console.log(data)
+} catch (e) {
+  console.log("Backend not available, using blockchain risk");
+}
 setProduct({
   batchId: product.batchId,
   company: product.company,
   batchNo: product.batchNo,
   mfd: product.mfd,
   expiry: product.expiry,
-  mrp: product.mrp
+  mrp: product.mrp,
+  riskScore: backendRisk
 });
       // ✅ Fetch ONLY risk from backend
-let backendRisk = null;
 
-try {
-  const res = await fetch(`https://trustchain-backend-zi7z.onrender.com/batch/${id}`);
-  const data = await res.json();
-  backendRisk = data.risk;
-} catch (e) {
-  console.log("Backend not available, using blockchain risk");
-}
 //       setProduct({
 //   batchId: id,
 //   company,
