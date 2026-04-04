@@ -93,3 +93,75 @@ export function startAnimationLoop(refs, onTxEvent) {
         sp.material.opacity = 0.14;
       }
     });
+
+    sg.position.y = 0.3 + Math.sin(state.t * 0.6) * 0.038;
+    sg.rotation.y = Math.sin(state.t * 0.2) * 0.01;
+    glow.intensity      = 1.3 + Math.sin(state.t * 1.5) * 0.7;
+    backFill.intensity  = 1.0 + Math.sin(state.t * 0.85) * 0.38;
+    signLight.intensity = 2.8 + Math.sin(state.t * 2.0) * 1.6;
+    forkl.position.y = -0.6 + Math.sin(state.t * 1.2) * 0.04;
+    wkg.position.y   = -0.9 + Math.sin(state.t * 1.8) * 0.03;
+    wkg.rotation.y   = -0.6 + Math.sin(state.t * 0.5) * 0.18;
+
+    if (++state.spawnT >= 55) { spawnPlainBox(); state.spawnT = 0; }
+
+    for (let i = state.verifyQueue.length - 1; i >= 0; i--) {
+      state.verifyQueue[i].t--;
+      if (state.verifyQueue[i].t <= 0) {
+        spawnVerifiedBox(state.verifyQueue[i].sz, state.verifyQueue[i].lane);
+        state.verifyQueue.splice(i, 1);
+      }
+    }
+
+    for (let i = boxes.length - 1; i >= 0; i--) {
+      const b = boxes[i], g = b.g;
+
+      if (b.phase === "incoming") {
+        b.t += b.spd;
+        if (b.t >= 0.92) { b.phase = "entering"; b.enterFr = 0; continue; }
+        const tc    = Math.min(b.t, 0.9999);
+        const pos   = bez3(tc, b.path[0], b.path[1], b.path[2], b.path[3]);
+        const ahead = bez3(Math.min(tc + 0.012, 0.9999), b.path[0], b.path[1], b.path[2], b.path[3]);
+        g.position.set(pos.x, pos.y + Math.sin(state.t * 1.6 + b.t * 8) * 0.018, pos.z);
+        g.rotation.y = Math.atan2(ahead.x - pos.x, ahead.z - pos.z);
+
+      } else if (b.phase === "entering") {
+        b.enterFr = (b.enterFr || 0) + 1;
+        g.scale.setScalar(Math.max(1 - b.enterFr / 20, 0.01));
+        if (b.enterFr >= 20) {
+          scene.remove(g);
+          boxes.splice(i, 1);
+          state.verifyQueue.push({ sz: b.sz, t: 38, lane: b.lane });
+          continue;
+        }
+
+      } else if (b.phase === "exiting") {
+        b.t += b.spd;
+        if (b.t >= 1.0) { scene.remove(g); boxes.splice(i, 1); continue; }
+        const tc  = Math.min(b.t, 0.9999);
+        const pos = bez3(tc, b.path[0], b.path[1], b.path[2], b.path[3]);
+        g.position.set(pos.x, pos.y + Math.sin(state.t * 2 + b.t * 8) * 0.016, pos.z);
+        // QR (+Z face) always rotated to face camera
+        const dx = cam.position.x - pos.x;
+        const dz = cam.position.z - pos.z;
+        g.rotation.y = Math.atan2(dx, dz);
+      }
+    }
+
+    for (let i = 0; i < ptN; i++) {
+      ptA[i * 3 + 1] += 0.003;
+      if (ptA[i * 3 + 1] > 10) ptA[i * 3 + 1] = -1.5;
+    }
+    ptG.attributes.position.needsUpdate = true;
+
+    cam.position.x = Math.sin(state.t * 0.055) * 1.5;
+    cam.position.z = 26 + Math.cos(state.t * 0.05) * 1.4;
+    cam.position.y = 14 + Math.sin(state.t * 0.04) * 0.55;
+    cam.lookAt(Math.sin(state.t * 0.05) * 0.4, 1.2, 0);
+
+    renderer.render(scene, cam);
+  }
+
+  animate();
+  return () => cancelAnimationFrame(rafId);
+}
