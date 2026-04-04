@@ -278,7 +278,7 @@ function toUnix(date) {
       // const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
       pushLog("Sending data to Algorand...");
 
-const res = await fetch("http://192.168.54.137:5000/store-batch", {
+const res = await fetch("http://localhost:5000/store-batch", {
   method: "POST",
   headers: {
     "Content-Type": "application/json"
