@@ -284,32 +284,55 @@ function toUnix(date) {
       // const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 //       pushLog("Sending data to Algorand...");
 
-const res = await fetch("http://192.168.54.137:5000/store-batch", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    batchId,
-    company,
-    batchNo,
-    mfd: toUnix(mfd),
-expiry: toUnix(expiry),
-    mrp
-  })
+// const res = await fetch("http://192.168.54.137:5000/store-batch", {
+//   method: "POST",
+//   headers: {
+//     "Content-Type": "application/json"
+//   },
+//   body: JSON.stringify({
+//     batchId,
+//     company,
+//     batchNo,
+//     mfd: toUnix(mfd),
+// expiry: toUnix(expiry),
+//     mrp
+//   })
+// });
+
+// const data = await res.json();
+
+// const txId = data.txId;
+
+// if (!txId) {
+//   throw new Error("Failed to get txId from backend");
+// }
+
+// pushLog(`Stored on Algorand: ${txId.slice(0, 10)}…`, "ok");
+pushLog("Connecting wallet...");
+
+// 1️⃣ Connect wallet
+await peraWallet.disconnect(); // reset old session
+
+const accounts = await peraWallet.connect();
+const sender = accounts[0];
+console.log("Sender:", sender);
+peraWallet.reconnectSession().then((accounts) => {
+  if (accounts.length) {
+    console.log("Reconnected:", accounts[0]);
+  }
 });
+pushLog(`Wallet: ${sender.slice(0, 10)}…`, "ok");
 
-const data = await res.json();
-
-const txId = data.txId;
-
-if (!txId) {
-  throw new Error("Failed to get txId from backend");
-}
-
-pushLog(`Stored on Algorand: ${txId.slice(0, 10)}…`, "ok");
-
-
+// 2️⃣ Prepare batch data
+const batch = {
+  batchId,
+  company,
+  batchNo,
+  mfd: toUnix(mfd),
+  expiry: toUnix(expiry),
+  mrp
+};
+pushLog("Preparing transaction from backend...");
 const algodClient = new algosdk.Algodv2(
   "",
   "https://testnet-api.algonode.cloud",
@@ -340,21 +363,63 @@ const signedTxns = await peraWallet.signTransaction([
     }
   ]
 ]);
-
 const result = await algodClient.sendRawTransaction(
   signedTxns[0]
 ).do();
 console.log("RESULT:", result);
 const txId = result?.txId || txn.txID().toString();
-
 console.log("TX ID:", txId);
 await algosdk.waitForConfirmation(algodClient, txId, 2);
-
 pushLog(`Stored on Algorand: ${txId.slice(0, 10)}…`, "ok");
-// ❌ DO NOT THROW ERROR HERE
-// ✅ SAVE FOR QR
 setRegisteredId(txId);
+
 setStatus("success");
+// const accounts = await peraWallet.connect();
+// const sender = accounts[0];
+
+// const algodClient = new algosdk.Algodv2(
+//   "",
+//   "https://testnet-api.algonode.cloud",
+//   ""
+// );
+
+// let params = await algodClient.getTransactionParams().do();
+// params.flatFee = true;
+// params.fee = 1000;
+
+// const note = new Uint8Array(Buffer.from(JSON.stringify(form)));
+
+// const receiver = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
+
+// const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+//   sender,
+//   receiver,
+//   amount: 1000,
+//   note,
+//   suggestedParams: params,
+// });
+
+// const signedTxns = await peraWallet.signTransaction([
+//   [
+//     {
+//       txn: txn,
+//       signers: [sender],
+//     }
+//   ]
+// ]);
+
+// const result = await algodClient.sendRawTransaction(
+//   signedTxns[0]
+// ).do();
+
+// const txId = result?.txId || txn.txID().toString();
+
+// await algosdk.waitForConfirmation(algodClient, txId, 2);
+
+// pushLog(`Stored on Algorand: ${txId.slice(0, 10)}…`, "ok");
+
+// setRegisteredId(txId);
+// setStatus("success");
 
       // pushLog(`TX submitted: ${tx.hash.slice(0, 10)}…${tx.hash.slice(-6)}`, "ok");
       // setTxHash(tx.hash);
