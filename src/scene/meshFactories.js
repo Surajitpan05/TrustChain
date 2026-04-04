@@ -98,3 +98,113 @@ export function makeVerifiedBox(sz, col, M, sh, QRS) {
     new THREE.PlaneGeometry(qSz, qSz),
     new THREE.MeshBasicMaterial({
       map: qrTex,
+      transparent: false,   // solid — no alpha blending darkening it
+    })
+  );
+  qrPlane.position.set(0, sz * 0.04, faceZ + 0.012);
+  g.add(qrPlane);
+
+  // ── Slim glowing border (outside the white card, doesn't overlap QR) ─────
+  const borderMat = new THREE.MeshStandardMaterial({
+    color: 0x00c864, emissive: 0x00c864, emissiveIntensity: 1.6, roughness: 0.04,
+  });
+  const cardW = qSz + padding * 2;
+  const borderThk = 0.035;
+  const bZ = faceZ + 0.018;
+  [
+    [cardW + borderThk * 2, borderThk,  0,              cardW / 2 + borderThk / 2],  // top
+    [cardW + borderThk * 2, borderThk,  0,             -cardW / 2 - borderThk / 2],  // bottom
+    [borderThk,             cardW,     -cardW / 2 - borderThk / 2, 0],               // left
+    [borderThk,             cardW,      cardW / 2 + borderThk / 2, 0],               // right
+  ].forEach(([w, h, bx, by]) => {
+    const bar = new THREE.Mesh(new THREE.PlaneGeometry(w, h), borderMat);
+    bar.position.set(bx, by + sz * 0.04, bZ);
+    g.add(bar);
+  });
+
+  // ── "CHAIN VERIFIED" badge — positioned below the QR card ────────────────
+  const vc = document.createElement("canvas"); vc.width = 640; vc.height = 112;
+  const vx = vc.getContext("2d");
+
+  // Badge background
+  vx.fillStyle = "#001208";
+  vx.fillRect(0, 0, 640, 112);
+
+  // Green border
+  vx.strokeStyle = "#00c864";
+  vx.lineWidth = 4;
+  vx.strokeRect(4, 4, 632, 104);
+
+  // Inner subtle glow line
+  vx.strokeStyle = "rgba(0,200,100,0.25)";
+  vx.lineWidth = 2;
+  vx.strokeRect(10, 10, 620, 92);
+
+  // Checkmark + text
+  vx.fillStyle = "#00c864";
+  vx.shadowColor = "#00c864";
+  vx.shadowBlur = 22;
+  vx.font = "bold 54px 'Courier New', monospace";
+  vx.textAlign = "center";
+  vx.fillText("✓ CHAIN VERIFIED", 320, 76);
+
+  const badgePlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(sz * 0.88, sz * 0.20),
+    new THREE.MeshBasicMaterial({
+      map: new THREE.CanvasTexture(vc),
+      transparent: true,
+      depthWrite: false,
+    })
+  );
+  // Sits just below the QR card
+  badgePlane.position.set(0, -(qSz / 2 + padding + sz * 0.12) + sz * 0.04, faceZ + 0.018);
+  g.add(badgePlane);
+
+  return g;
+}
+
+// ── Forklift ────────────────────────────────────────────────────────────────
+export function makeForklift(M, sh) {
+  const g = new THREE.Group();
+
+  g.add(sh(new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.0, 0.9), M(0x0e2018, 0.4, 0.5))));
+
+  const cab = sh(new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.8, 0.85), M(0x0a1810, 0.35, 0.6)));
+  cab.position.set(0.4, 0.9, 0);
+  g.add(cab);
+
+  const mast = sh(new THREE.Mesh(
+    new THREE.BoxGeometry(0.12, 2.4, 0.12),
+    new THREE.MeshStandardMaterial({ color: 0x00c864, roughness: 0.2, metalness: 0.6, emissive: 0x00c864, emissiveIntensity: 0.4 })
+  ));
+  mast.position.set(-0.7, 1.2, 0);
+  g.add(mast);
+
+  [-0.22, 0.22].forEach(oz => {
+    const fk = sh(new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.08, 0.1), M(0x00a050, 0.25, 0.8)));
+    fk.position.set(-1.1, 0.1, oz);
+    g.add(fk);
+  });
+
+  [[-0.7, -0.55, -0.45], [0.6, -0.55, -0.45], [-0.7, -0.55, 0.45], [0.6, -0.55, 0.45]].forEach(([x, y, z]) => {
+    const w = sh(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.18, 12), M(0x0a1208, 0.8, 0.2)));
+    w.rotation.x = Math.PI / 2;
+    w.position.set(x, y, z);
+    g.add(w);
+  });
+
+  return g;
+}
+
+// ── Pallet ──────────────────────────────────────────────────────────────────
+export function makePallet(M, sh) {
+  const g = new THREE.Group();
+  const pc = M(0x2a1a08, 0.8, 0.1);
+  g.add(sh(new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 1.1), pc)));
+  for (let i = -1; i <= 1; i++) {
+    const b = sh(new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.12, 0.18), pc));
+    b.position.set(0, -0.11, i * 0.38);
+    g.add(b);
+  }
+  return g;
+}
