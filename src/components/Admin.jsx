@@ -363,3 +363,285 @@ setStatus("success");
   }, [registeredId]);
 
   const logColor = (t) => t === "ok" ? "#00e872" : t === "err" ? "#ff7070" : "rgba(226,244,232,0.38)";
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @keyframes tcSpin    { to { transform: rotate(360deg); } }
+        @keyframes tcFadeUp  { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes tcPulse   { 0%,100%{opacity:1} 50%{opacity:.15} }
+        @keyframes tcScan    { 0%{top:-80px} 100%{top:100vh} }
+        @keyframes tcGlow    { 0%,100%{box-shadow:0 0 0 0 rgba(0,200,100,.25)} 50%{box-shadow:0 0 0 6px rgba(0,200,100,0)} }
+        @keyframes tcBlink   { 0%,100%{border-color:rgba(0,200,100,.22)} 50%{border-color:rgba(0,200,100,.52)} }
+        @keyframes tcReveal  { from{opacity:0;transform:scale(.96)} to{opacity:1;transform:scale(1)} }
+        @keyframes tcShimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
+
+        .tc-admin-root {
+          min-height: 100vh;
+          background: #030f07;
+          font-family: 'Space Mono', monospace;
+          color: #e2f4e8;
+          position: relative;
+          overflow-x: hidden;
+        }
+
+        .tc-grid {
+          position: fixed; inset: 0; pointer-events: none; z-index: 0;
+          background-image:
+            linear-gradient(rgba(0,200,100,.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,200,100,.04) 1px, transparent 1px);
+          background-size: 44px 44px;
+        }
+
+        .tc-scanline {
+          position: fixed; left:0; right:0; height:90px;
+          background: linear-gradient(transparent, rgba(0,200,100,.018), transparent);
+          pointer-events: none; z-index: 1;
+          animation: tcScan 9s linear infinite;
+        }
+
+        .tc-wrap {
+          position: relative; z-index: 2;
+          max-width: 1000px; margin: 0 auto;
+          padding: 40px 20px 60px;
+          /* offset for fixed navbar (~64px tall + 16px breathing room) */
+          padding-top: 96px;
+        }
+        @media(min-width:640px){ .tc-wrap{ padding: 104px 32px 72px; } }
+
+        /* ── Header ── */
+        .tc-header {
+          display: flex; align-items: center;
+          justify-content: space-between; flex-wrap: wrap; gap: 16px;
+          margin-bottom: 44px;
+          animation: tcFadeUp .45s ease both;
+        }
+        .tc-header-left { display:flex; align-items:center; gap:18px; }
+        .tc-logo {
+          width: 48px; height: 48px; border-radius: 10px;
+          border: 1px solid rgba(0,200,100,.35);
+          background: rgba(0,200,100,.07);
+          display: flex; align-items: center; justify-content: center;
+          animation: tcGlow 3s ease-in-out infinite;
+        }
+        .tc-breadcrumb { font-size:9px; letter-spacing:4px; color:rgba(0,200,100,.45); text-transform:uppercase; margin-bottom:6px; }
+        .tc-title { font-family:'Orbitron',sans-serif; font-size:clamp(16px,3vw,22px); font-weight:900; color:#fff; letter-spacing:3px; }
+        .tc-net-badge {
+          display:flex; align-items:center; gap:8px;
+          padding:8px 16px; border:1px solid rgba(0,200,100,.2); border-radius:3px;
+          background:rgba(0,200,100,.05); font-size:9px; letter-spacing:2px;
+          color:rgba(0,200,100,.6); text-transform:uppercase;
+        }
+        .tc-net-dot { width:6px; height:6px; border-radius:50%; background:#00e872; animation:tcPulse 2s ease-in-out infinite; }
+
+        /* ── Layout ── */
+        .tc-layout {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+          align-items: start;
+        }
+        @media(min-width:780px){ .tc-layout{ grid-template-columns: 1fr 320px; } }
+
+        /* ── Panel ── */
+        .tc-panel {
+          background: #071409;
+          border: 1px solid rgba(0,200,100,.22);
+          border-radius: 8px;
+          overflow: hidden;
+          position: relative;
+          animation: tcFadeUp .5s .05s ease both;
+        }
+        .tc-panel::before {
+          content:''; position:absolute; top:0; left:0; width:3px; height:100%;
+          background: linear-gradient(to bottom, rgba(0,200,100,.6), transparent);
+        }
+        .tc-panel-strip {
+          height: 3px;
+          background: linear-gradient(90deg, #00c864 0%, rgba(0,200,100,.3) 60%, transparent 100%);
+        }
+        .tc-panel-inner { padding: 28px 24px; }
+        @media(min-width:640px){ .tc-panel-inner{ padding:32px 32px; } }
+
+        .tc-sec-label {
+          font-size:9px; letter-spacing:3.5px; color:rgba(0,200,100,.55);
+          text-transform:uppercase; margin-bottom:26px;
+          display:flex; align-items:center; gap:10px;
+        }
+        .tc-sec-line { width:14px; height:1px; background:rgba(0,200,100,.35); }
+
+        /* ── Form ── */
+        .tc-form-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 18px;
+        }
+        .tc-field-full { grid-column: 1 / -1; }
+
+        .tc-label {
+          display:block; font-size:8px; letter-spacing:2.5px;
+          color:rgba(0,200,100,.5); text-transform:uppercase; margin-bottom:7px;
+        }
+
+        .tc-input {
+          width:100%;
+          background: #0b1c10;
+          border: 1px solid rgba(0,200,100,.18);
+          border-radius:5px;
+          padding: 11px 14px;
+          color: #e2f4e8;
+          font-size: 13px;
+          font-family: 'Space Mono', monospace;
+          outline: none;
+          transition: border-color .2s, background .2s;
+          letter-spacing: .4px;
+        }
+        .tc-input:focus { border-color:rgba(0,200,100,.55); background:#0e2416; }
+        .tc-input:disabled { opacity:.5; cursor:not-allowed; }
+        .tc-input::placeholder { color:rgba(226,244,232,.2); }
+        input[type="date"].tc-input::-webkit-calendar-picker-indicator {
+          filter: invert(.6) sepia(1) saturate(4) hue-rotate(95deg) brightness(.9);
+          cursor:pointer;
+        }
+        input[type="number"].tc-input::-webkit-outer-spin-button,
+        input[type="number"].tc-input::-webkit-inner-spin-button { -webkit-appearance:none; }
+
+        /* ── Submit button ── */
+        .tc-submit {
+          width:100%; margin-top:26px; padding:15px;
+          background: rgba(0,200,100,.09);
+          border: 1px solid rgba(0,200,100,.38);
+          border-radius:6px;
+          color: #00e872;
+          font-size:10px; font-family:'Space Mono',monospace;
+          font-weight:700; letter-spacing:3px; text-transform:uppercase;
+          cursor:pointer; transition:all .2s;
+          display:flex; align-items:center; justify-content:center; gap:10px;
+        }
+        .tc-submit:hover:not(:disabled) {
+          background:rgba(0,200,100,.16);
+          border-color:rgba(0,200,100,.6);
+          box-shadow: 0 0 24px rgba(0,200,100,.12);
+        }
+        .tc-submit:disabled { opacity:.6; cursor:not-allowed; }
+
+        /* ── Status boxes ── */
+        .tc-success {
+          display:flex; align-items:flex-start; gap:12px;
+          padding:14px 16px; margin-top:18px;
+          background:rgba(0,200,100,.07);
+          border:1px solid rgba(0,200,100,.3);
+          border-left:3px solid #00c864;
+          border-radius:4px;
+          animation:tcFadeUp .35s ease both;
+        }
+        .tc-success-text { font-size:12px; color:#00e872; font-weight:700; margin-bottom:4px; letter-spacing:.5px; }
+        .tc-success-hash { font-size:10px; color:rgba(0,200,100,.5); font-family:'Space Mono',monospace; word-break:break-all; }
+
+        .tc-error {
+          display:flex; align-items:flex-start; gap:12px;
+          padding:14px 16px; margin-top:18px;
+          background:rgba(255,80,80,.06);
+          border:1px solid rgba(255,80,80,.25);
+          border-left:3px solid #ff5a5a;
+          border-radius:4px;
+          font-size:11px; color:#ff7070; line-height:1.6; letter-spacing:.3px;
+          animation:tcFadeUp .35s ease both;
+        }
+
+        /* ── TX log ── */
+        .tc-log { margin-top:24px; }
+        .tc-log-title {
+          font-size:8px; letter-spacing:2.5px; color:rgba(0,200,100,.4);
+          text-transform:uppercase; margin-bottom:10px;
+        }
+        .tc-log-box {
+          background:#060f09;
+          border:1px solid rgba(0,200,100,.1);
+          border-radius:4px; overflow:hidden;
+        }
+        .tc-log-row {
+          display:flex; align-items:flex-start; gap:10px;
+          padding:8px 12px; font-size:10px;
+          border-bottom:1px solid rgba(255,255,255,.03);
+          font-family:'Space Mono',monospace; line-height:1.5;
+          animation:tcFadeUp .25s ease both;
+        }
+        .tc-log-row:last-child { border-bottom:none; }
+        .tc-log-time { color:rgba(226,244,232,.2); flex-shrink:0; font-size:9px; padding-top:1px; }
+
+        /* ── QR Panel ── */
+        .tc-qr-panel {
+          background: #071409;
+          border:1px solid rgba(0,200,100,.22);
+          border-radius:8px; overflow:hidden;
+          display:flex; flex-direction:column;
+          animation: tcFadeUp .5s .1s ease both;
+          position:sticky; top:24px;
+        }
+        .tc-qr-inner { padding:26px 24px; display:flex; flex-direction:column; gap:20px; align-items:center; }
+
+        .tc-qr-frame {
+          padding:16px; background:#fff;
+          border-radius:8px;
+          box-shadow:0 0 0 1px rgba(0,0,0,.08);
+          animation:tcReveal .5s ease both;
+        }
+        .tc-qr-empty {
+          width:156px; height:156px;
+          border:2px dashed rgba(0,200,100,.18);
+          border-radius:8px;
+          display:flex; flex-direction:column;
+          align-items:center; justify-content:center;
+          gap:12px; animation:tcBlink 3s ease-in-out infinite;
+        }
+        .tc-qr-empty-text {
+          font-size:9px; letter-spacing:1.5px; color:rgba(0,200,100,.25);
+          text-transform:uppercase; text-align:center; line-height:1.8;
+          max-width:130px;
+        }
+
+        .tc-qr-id-label { font-size:8px; letter-spacing:2.5px; color:rgba(0,200,100,.45); text-transform:uppercase; text-align:center; }
+        .tc-qr-id-val {
+          font-family:'Orbitron',sans-serif; font-size:12px; font-weight:900;
+          color:#00e872; letter-spacing:2px; text-align:center; word-break:break-all;
+          background: linear-gradient(90deg, #00c864, #00ffb4, #00c864);
+          background-size:200% auto;
+          -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+          animation:tcShimmer 3s linear infinite;
+        }
+        .tc-qr-url {
+          font-size:9px; color:rgba(226,244,232,.18); text-align:center;
+          word-break:break-all; line-height:1.7; max-width:260px;
+          font-family:'Space Mono',monospace;
+        }
+
+        /* ── Download buttons ── */
+        .tc-dl-group { display:flex; gap:10px; width:100%; }
+        .tc-dl-btn {
+          flex:1; padding:10px 8px;
+          background:rgba(0,200,100,.06);
+          border:1px solid rgba(0,200,100,.22);
+          border-radius:5px;
+          color:rgba(0,200,100,.7);
+          font-size:8px; letter-spacing:2px; text-transform:uppercase;
+          font-family:'Space Mono',monospace;
+          cursor:pointer; transition:all .18s;
+          display:flex; align-items:center; justify-content:center; gap:7px;
+        }
+        .tc-dl-btn:hover { background:rgba(0,200,100,.13); border-color:rgba(0,200,100,.5); color:#00e872; }
+        .tc-dl-btn svg { flex-shrink:0; }
+
+        /* ── Meta rows ── */
+        .tc-meta-rows { width:100%; border-top:1px solid rgba(0,200,100,.1); padding-top:18px; display:flex; flex-direction:column; gap:9px; }
+        .tc-meta-row { display:flex; justify-content:space-between; align-items:center; }
+        .tc-meta-key { font-size:8px; letter-spacing:2px; color:rgba(226,244,232,.25); text-transform:uppercase; }
+        .tc-meta-val { font-size:9px; letter-spacing:1px; color:rgba(0,200,100,.6); }
+
+        /* ── Divider ── */
+        .tc-divider { height:1px; background:rgba(0,200,100,.08); margin:0 -24px; }
+      `}</style>
