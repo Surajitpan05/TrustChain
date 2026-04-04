@@ -668,7 +668,7 @@ setStatus("success");
             </div>
             <div className="tc-net-badge">
               <div className="tc-net-dot" />
-              Ethereum Mainnet
+              Ethereum SepoliaETH
             </div>
           </div>
 
@@ -840,7 +840,7 @@ setStatus("success");
 
                 <div className="tc-meta-rows">
                   {[
-                    ["Network",     "Ethereum Mainnet"],
+                    ["Network",     "Ethereum SepoliaETH"],
                     ["Standard",    "ERC-1155"],
                     ["Immutability","Guaranteed"],
                     ["Audit trail", "On-chain"],

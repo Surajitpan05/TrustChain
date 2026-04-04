@@ -738,7 +738,7 @@ function DashboardFooter({ blockNumber = "#19,412,887" }) {
       </div>
       <div className="tc-footer-right">
         <div className="tc-net-dot" />
-        <span className="tc-net-label">Mainnet</span>
+        <span className="tc-net-label">SepoliaETH</span>
         <div className="tc-footer-sep" />
         <span className="tc-block-pill">{blockNumber}</span>
       </div>
@@ -862,7 +862,7 @@ try {
   ];
 
   const CHAIN_ROWS = [
-    ["Network",   "Ethereum Mainnet"],
+    ["Network",   "Ethereum SepoliaETH"],
     ["Standard",  "ERC-1155"],
     ["Consensus", "Proof of Stake"],
     ["Block",     "#19,412,887"],

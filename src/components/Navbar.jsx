@@ -430,7 +430,7 @@ export default function Navbar() {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div className="tc-status-chip">
               <span className="tc-status-blink" />
-              Live · Mainnet
+              Live · SepoliaETH
             </div>
             <div className="tc-nav-divider" />
             <button className="tc-verify-btn" onClick={handleVerify}>
