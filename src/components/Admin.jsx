@@ -772,3 +772,92 @@ setStatus("success");
 
               </div>
             </div>
+
+            {/* ── QR Panel ── */}
+            <div className="tc-qr-panel">
+              <div className="tc-panel-strip" />
+              <div className="tc-qr-inner">
+
+                <div className="tc-sec-label" style={{ margin: 0, alignSelf: "flex-start" }}>
+                  <span className="tc-sec-line" />
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="4" height="4"/>
+                  </svg>
+                  Verification QR
+                </div>
+
+                {registeredId ? (
+                  <>
+                    <div id="tc-qr-target" className="tc-qr-frame" ref={qrRef}>
+                      <QRCodeSVG
+                        value={productUrl}
+                        size={168}
+                        bgColor="#ffffff"
+                        fgColor="#030f07"
+                        level="H"
+                        includeMargin={false}
+                      />
+                    </div>
+
+                    <div style={{ textAlign: "center", width: "100%" }}>
+                      <div className="tc-qr-id-label" style={{ marginBottom: 8 }}>Batch ID</div>
+                      <div className="tc-qr-id-val">{registeredId}</div>
+                    </div>
+
+                    <div className="tc-qr-url">{productUrl}</div>
+
+                    {/* Download buttons */}
+                    <div className="tc-dl-group">
+                      <button className="tc-dl-btn" onClick={downloadQRpng}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                          <polyline points="7 10 12 15 17 10"/>
+                          <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        PNG
+                      </button>
+                      <button className="tc-dl-btn" onClick={downloadQRsvg}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                          <polyline points="7 10 12 15 17 10"/>
+                          <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        SVG
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="tc-qr-empty">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,200,100,0.2)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                      <rect x="3" y="14" width="7" height="7"/>
+                      <circle cx="17.5" cy="17.5" r="2.5"/>
+                    </svg>
+                    <div className="tc-qr-empty-text">QR appears after successful registration</div>
+                  </div>
+                )}
+
+                <div className="tc-meta-rows">
+                  {[
+                    ["Network",     "Ethereum Mainnet"],
+                    ["Standard",    "ERC-1155"],
+                    ["Immutability","Guaranteed"],
+                    ["Audit trail", "On-chain"],
+                  ].map(([k, v]) => (
+                    <div className="tc-meta-row" key={k}>
+                      <span className="tc-meta-key">{k}</span>
+                      <span className="tc-meta-val">{v}</span>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
