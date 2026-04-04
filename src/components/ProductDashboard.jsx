@@ -589,3 +589,138 @@ function GlobalStyles() {
   );
 }
 
+// ─── Risk Score Gauge ──────────────────────────────────────────────────────────
+function RiskGauge({ score }) {
+  const risk = getRiskLevel(score);
+  const r = 58;
+  const cx = 70;
+  const cy = 70;
+  const startAngle = -180;
+  const endAngle = 0;
+  const totalAngle = endAngle - startAngle;
+  const circumference = Math.PI * r;
+  const filled = (score / 100) * circumference;
+  const gap = circumference - filled;
+
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const arcStart = {
+    x: cx + r * Math.cos(toRad(startAngle)),
+    y: cy + r * Math.sin(toRad(startAngle)),
+  };
+  const arcEnd = {
+    x: cx + r * Math.cos(toRad(endAngle)),
+    y: cy + r * Math.sin(toRad(endAngle)),
+  };
+
+  return (
+    <div className="tc-risk-gauge-wrap">
+      <svg width="140" height="80" viewBox="0 0 140 80" style={{ overflow: "visible" }}>
+        {/* Track */}
+        <path
+          d={`M ${arcStart.x} ${arcStart.y} A ${r} ${r} 0 0 1 ${arcEnd.x} ${arcEnd.y}`}
+          fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" strokeLinecap="round"
+        />
+        {/* Fill segments: green → amber → red */}
+        <defs>
+          <linearGradient id="riskGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor="#00c864" />
+            <stop offset="40%"  stopColor="#f5a623" />
+            <stop offset="100%" stopColor="#ff5a5a" />
+          </linearGradient>
+        </defs>
+        <path
+          d={`M ${arcStart.x} ${arcStart.y} A ${r} ${r} 0 0 1 ${arcEnd.x} ${arcEnd.y}`}
+          fill="none" stroke="url(#riskGrad)" strokeWidth="10" strokeLinecap="round"
+          strokeDasharray={`${circumference}`}
+          strokeDashoffset={gap}
+          style={{
+            "--gauge-start": circumference,
+            "--gauge-end": gap,
+            animation: "gaugeAnim 1.2s 0.3s cubic-bezier(.4,0,.2,1) both",
+          }}
+        />
+        {/* Needle dot */}
+        <circle
+          cx={cx + r * Math.cos(toRad(startAngle + (score / 100) * totalAngle))}
+          cy={cy + r * Math.sin(toRad(startAngle + (score / 100) * totalAngle))}
+          r="6" fill={risk.color} stroke="#071409" strokeWidth="2"
+        />
+        {/* Score number */}
+        <text
+          x={cx} y={cy + 12}
+          textAnchor="middle"
+          fontFamily="Orbitron, sans-serif"
+          fontSize="26" fontWeight="900"
+          fill={risk.color}
+        >
+          {score}
+        </text>
+        <text
+          x={cx} y={cy + 24}
+          textAnchor="middle"
+          fontFamily="Space Mono, monospace"
+          fontSize="7" letterSpacing="2"
+          fill="rgba(226,244,232,0.35)"
+        >
+          / 100
+        </text>
+      </svg>
+    </div>
+  );
+}
+
+// ─── Risk Score Section ────────────────────────────────────────────────────────
+function RiskScorePanel({ score }) {
+  const risk = getRiskLevel(score);
+  const riskDesc =
+    score <= 30
+      ? "This batch has a low risk profile. Supply chain integrity is intact, no anomalies detected by AI analysis."
+      : score <= 60
+      ? "Moderate risk indicators detected. Some supply chain anomalies were flagged. Manual verification recommended."
+      : "High risk detected. Multiple anomalies in supply chain data. This batch requires immediate investigation before distribution.";
+
+  return (
+    <div className="tc-risk-card">
+      <div className="tc-risk-inner">
+        <div className="tc-sec-title">
+          <span className="tc-sec-title-line" />
+          <Icon name="brain" size={10} color="rgba(0,200,100,0.6)" />
+          AI Risk Assessment
+        </div>
+        <div className="tc-risk-layout">
+          <RiskGauge score={score} />
+          <div className="tc-risk-info">
+            <div
+              className="tc-risk-level-badge"
+              style={{ background: risk.bg, border: `1px solid ${risk.border}`, color: risk.color }}
+            >
+              <div style={{ width: 7, height: 7, borderRadius: "50%", background: risk.color, animation: "blink 1.4s step-end infinite", flexShrink: 0 }} />
+              {risk.label}
+            </div>
+            <div className="tc-risk-desc">{riskDesc}</div>
+            <div className="tc-risk-bar-track">
+              <div className="tc-risk-bar-zones">
+                <div style={{ flex: "0 0 30%", background: "rgba(0,200,100,0.12)" }} />
+                <div style={{ flex: "0 0 30%", background: "rgba(245,166,35,0.1)" }} />
+                <div style={{ flex: "0 0 40%", background: "rgba(255,90,90,0.1)" }} />
+              </div>
+              <div
+                className="tc-risk-bar-fill"
+                style={{
+                  "--target-w": `${score}%`,
+                  background: risk.color,
+                  opacity: 0.9,
+                }}
+              />
+            </div>
+            <div className="tc-risk-bar-labels">
+              <span>Low (0–30)</span>
+              <span>Moderate (31–60)</span>
+              <span>High (61–100)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
