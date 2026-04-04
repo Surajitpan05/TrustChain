@@ -645,3 +645,130 @@ setStatus("success");
         /* ── Divider ── */
         .tc-divider { height:1px; background:rgba(0,200,100,.08); margin:0 -24px; }
       `}</style>
+
+      <div className="tc-admin-root">
+        <div className="tc-grid" />
+        <div className="tc-scanline" />
+
+        <div className="tc-wrap">
+
+          {/* ── Header ── */}
+          <div className="tc-header">
+            <div className="tc-header-left">
+              <div className="tc-logo">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00e872" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+              </div>
+              <div>
+                <div className="tc-breadcrumb">TrustChain / Admin Console</div>
+                <div className="tc-title">Batch Registration</div>
+              </div>
+            </div>
+            <div className="tc-net-badge">
+              <div className="tc-net-dot" />
+              Ethereum Mainnet
+            </div>
+          </div>
+
+          {/* ── Two-column layout ── */}
+          <div className="tc-layout">
+
+            {/* ── Form Panel ── */}
+            <div className="tc-panel">
+              <div className="tc-panel-strip" />
+              <div className="tc-panel-inner">
+
+                <div className="tc-sec-label">
+                  <span className="tc-sec-line" />
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M9 9h6M9 13h6M9 17h4"/>
+                  </svg>
+                  Product Batch Details
+                </div>
+
+                <div className="tc-form-grid">
+                  {FIELDS.map(({ name, label, placeholder, type, full }) => (
+                    <div key={name} className={full ? "tc-field-full" : ""}>
+                      <label className="tc-label">{label}</label>
+                      {name === "sensorId" ? (
+  <select
+  className="tc-input"
+  name="sensorId"
+  value={form.sensorId}
+  onChange={handleChange}
+>
+  <option value="">Select Sensor</option>
+  <option value="sensor1">Sensor 1</option>
+  <option value="sensor2">Sensor 2</option>
+</select>
+) : (
+  <input
+    className="tc-input"
+    name={name}
+    type={type}
+    placeholder={placeholder}
+    value={form[name]}
+    onChange={handleChange}
+  />
+)}
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  className="tc-submit"
+                  onClick={handleSubmit}
+                  disabled={status === "loading"}
+                >
+                  {status === "loading"
+                    ? <><Spinner /> Broadcasting to chain…</>
+                    : <>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                        </svg>
+                        Register on Blockchain
+                      </>
+                  }
+                </button>
+
+                {status === "success" && (
+                  <div className="tc-success">
+                    <CheckIcon />
+                    <div>
+                      <div className="tc-success-text">Batch immortalised on-chain ✓</div>
+                      {txHash && (
+                        <div className="tc-success-hash">
+                          TX: {txHash.slice(0, 18)}…{txHash.slice(-8)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {status === "error" && (
+                  <div className="tc-error">
+                    <WarnIcon />
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
+
+                {log.length > 0 && (
+                  <div className="tc-log">
+                    <div className="tc-log-title">Transaction log</div>
+                    <div className="tc-log-box">
+                      {log.map((entry, i) => (
+                        <div className="tc-log-row" key={i}>
+                          <span className="tc-log-time">{entry.t}</span>
+                          <span style={{ color: logColor(entry.type), fontSize: 10 }}>{entry.msg}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            </div>
