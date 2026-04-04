@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback } from "react";
-import { ethers } from "ethers";
 import { QRCodeSVG } from "qrcode.react";
 
 const CONTRACT_ABI = [
@@ -247,7 +246,9 @@ export default function Admin() {
   const [registeredId, setRegisteredId] = useState("");
   const [log, setLog] = useState([]);
   const qrRef = useRef(null);
-
+function toUnix(date) {
+  return Math.floor(new Date(date).getTime() / 1000);
+}
   const pushLog = (msg, type = "info") =>
     setLog((p) => [{ msg, type, t: new Date().toLocaleTimeString("en-IN", { hour12: false }) }, ...p].slice(0, 8));
 
@@ -261,26 +262,56 @@ export default function Admin() {
     setStatus("loading"); setErrorMsg(""); setTxHash(""); setLog([]);
     pushLog("Requesting wallet signature…");
     try {
-      if (!window.ethereum) throw new Error("MetaMask not detected.");
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      // if (!window.ethereum) throw new Error("MetaMask not detected.");
+      // await window.ethereum.request({ method: "eth_requestAccounts" });
+      // const provider = new ethers.BrowserProvider(window.ethereum);
 
-      const network = await provider.getNetwork();
+      // const network = await provider.getNetwork();
     
-      if (network.chainId !== 11155111n) {
-      throw new Error("Please switch to Sepolia network");
-      }
+      // if (network.chainId !== 11155111n) {
+      // throw new Error("Please switch to Sepolia network");
+      // }
 
-      const signer = await provider.getSigner();
-      const addr = await signer.getAddress();
-      pushLog(`Wallet connected: ${addr.slice(0, 6)}…${addr.slice(-4)}`, "ok");
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-      pushLog("Sending transaction to mempool…");
-      const tx = await contract.registerBatch(batchId, company, batchNo, toUnix(mfd).toString(),  toUnix(expiry).toString(), ethers.parseUnits(mrp, 0));
-      pushLog(`TX submitted: ${tx.hash.slice(0, 10)}…${tx.hash.slice(-6)}`, "ok");
-      setTxHash(tx.hash);
-      pushLog("Awaiting block confirmation…");
-      await tx.wait();
+      // const signer = await provider.getSigner();
+      // const addr = await signer.getAddress();
+      // pushLog(`Wallet connected: ${addr.slice(0, 6)}…${addr.slice(-4)}`, "ok");
+      // const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+      pushLog("Sending data to Algorand...");
+
+const res = await fetch("http://192.168.54.137:5000/store-batch", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    batchId,
+    company,
+    batchNo,
+    mfd: toUnix(mfd),
+expiry: toUnix(expiry),
+    mrp
+  })
+});
+
+const data = await res.json();
+
+const txId = data.txId;
+
+if (!txId) {
+  throw new Error("Failed to get txId from backend");
+}
+
+pushLog(`Stored on Algorand: ${txId.slice(0, 10)}…`, "ok");
+
+// ✅ IMPORTANT CHANGE
+setRegisteredId(txId);
+
+setStatus("success");
+
+      // pushLog(`TX submitted: ${tx.hash.slice(0, 10)}…${tx.hash.slice(-6)}`, "ok");
+      // setTxHash(tx.hash);
+      // pushLog("Awaiting block confirmation…");
+      // await tx.wait();
 
 // ✅ ADD THIS BLOCK HERE
 await fetch("https://trustchain-backend-zi7z.onrender.com/assign", {
@@ -298,8 +329,8 @@ await fetch("https://trustchain-backend-zi7z.onrender.com/assign", {
 pushLog("Sensor assigned to batch successfully", "ok");
 
 pushLog("Confirmed ✓  Batch immortalised on-chain.", "ok");
-setRegisteredId(batchId);
-setStatus("success");
+// setRegisteredId(batchId);
+// setStatus("success");
     } catch (err) {
       const msg = err.reason || err.message || "Transaction failed.";
       setErrorMsg(msg);

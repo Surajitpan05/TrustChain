@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { ethers } from "ethers";
 
 const CONTRACT_ABI = [
 	{
@@ -761,15 +760,32 @@ export default function ProductDashboard() {
   const fetchProduct = async () => {
     setLoadState("loading");
     try {
-      let provider;
+      // let provider;
 
-      if (window.ethereum) {
-        provider = new ethers.BrowserProvider(window.ethereum);
-      } else {
-        provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/fa5f0f75195f4be2bca17df6ddcd79f2");
-      }
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
-      const [company, batchNo, mfd, expiry, mrp, riskScore] = await contract.getBatch(id);
+      // if (window.ethereum) {
+      //   provider = new ethers.BrowserProvider(window.ethereum);
+      // } else {
+      //   provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/fa5f0f75195f4be2bca17df6ddcd79f2");
+      // }
+      // const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+      const res = await fetch(
+  `https://testnet-idx.algonode.cloud/v2/transactions/${id}`
+);
+
+const data = await res.json();
+console.log(data);
+const note = atob(data.transaction.note);
+
+const product = JSON.parse(note);
+
+setProduct({
+  batchId: product.batchId,
+  company: product.company,
+  batchNo: product.batchNo,
+  mfd: product.mfd,
+  expiry: product.expiry,
+  mrp: product.mrp
+});
       // ✅ Fetch ONLY risk from backend
 let backendRisk = null;
 
@@ -780,18 +796,19 @@ try {
 } catch (e) {
   console.log("Backend not available, using blockchain risk");
 }
-      setProduct({
-  batchId: id,
-  company,
-  batchNo,
-  mfd,
-  expiry,
-  mrp,
-  riskScore: backendRisk ?? Number(riskScore) // 🔥 MAIN CHANGE
-});
+//       setProduct({
+//   batchId: id,
+//   company,
+//   batchNo,
+//   mfd,
+//   expiry,
+//   mrp,
+//   riskScore: backendRisk ?? Number(riskScore) // 🔥 MAIN CHANGE
+// });
       setLoadState("loaded");
     } catch {
       // Fallback mock data
+      console.log(e);
       setProduct({
         batchId: id,
         company: "PharmaGen Industries Ltd.",
