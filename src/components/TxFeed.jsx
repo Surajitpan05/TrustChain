@@ -198,3 +198,156 @@ export default function TxFeed({ txFeed }) {
 
         {/* ── stats row ── */}
         <div style={sty.statsRow}>
+          {[
+            { label: "PEERS",   value: stats.peers,   color: "#00ffb4" },
+            { label: "PENDING", value: stats.pending,  color: "#f0c040" },
+            { label: "VERIFIED",value: stats.verified, color: "#60d0ff" },
+          ].map(({ label, value, color }) => (
+            <div key={label} style={sty.statBox}>
+              <div style={sty.statLabel}>{label}</div>
+              <div style={{ ...sty.statValue, color }}>{value || "—"}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── boot phase ── */}
+        {phase === "boot" && (
+          <div>
+            <div style={sty.sectionLabel}>$ INITIALIZING NODE...</div>
+            {bootVisible.map((line, i) => (
+              <div
+                key={i}
+                className="tc-fade"
+                style={{
+                  fontSize: line.small ? "9px" : "11px",
+                  color: line.dim ? "rgba(0,255,180,0.35)" : "rgba(0,255,180,0.7)",
+                  lineHeight: 1.85,
+                }}
+              >
+                {line.text}
+              </div>
+            ))}
+            <span className="tc-blink" style={sty.cursor}>▋</span>
+          </div>
+        )}
+
+        {/* ── live feed phase ── */}
+        {phase === "live" && (
+          <div>
+            <div style={sty.sectionLabel}>
+              <span className="tc-blink" style={{ fontSize: 7, marginRight: 6 }}>●</span>
+              LIVE SUPPLY CHAIN FEED
+            </div>
+
+            {events.length === 0 ? (
+              <div style={{ color: "rgba(255,255,255,0.2)", fontSize: 11 }}>
+                Awaiting events…
+              </div>
+            ) : (
+              events.map((ev, i) => (
+                <div
+                  key={ev.key}
+                  className="tc-fade"
+                  style={sty.eventRow}
+                >
+                  <div style={sty.eventTop}>
+                    <span
+                      style={{
+                        ...sty.badge,
+                        color: ev.color,
+                        borderColor: ev.color,
+                      }}
+                    >
+                      {ev.badge}
+                    </span>
+                    <span style={sty.timestamp}>
+                      {new Date().toLocaleTimeString("en-IN", { hour12: false })}
+                    </span>
+                  </div>
+                  <div style={{ ...sty.eventMsg, color: i === 0 ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.42)" }}>
+                    {i === 0
+                      ? ev.visibleText || ev.msg
+                      : ev.msg}
+                    {i === 0 && (ev.visibleText?.length ?? 0) < ev.msg.length && (
+                      <span className="tc-blink" style={sty.cursor}>▋</span>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+
+            <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6 }}>
+              <span className="tc-blink" style={sty.cursor}>▋</span>
+              <span style={sty.footerStat}>
+                {stats.verified} verified · {stats.pending} pending · {stats.peers} peers
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── local styles (extends S.txFeed from your style sheet) ────────────────────
+const sty = {
+  hashBg: {
+    position: "absolute", inset: 0,
+    fontSize: "8px", color: "#00ffb4", opacity: 0.018,
+    lineHeight: 1.5, overflow: "hidden",
+    wordBreak: "break-all", padding: "8px",
+    pointerEvents: "none", whiteSpace: "pre-wrap",
+  },
+  scanline: {
+    position: "absolute", left: 0, right: 0, height: "80px",
+    background: "linear-gradient(transparent,rgba(0,255,180,0.025),transparent)",
+    animation: "scanline 5s linear infinite",
+    pointerEvents: "none", zIndex: 0,
+  },
+  inner:    { position: "relative", zIndex: 1 },
+  header:   {
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    marginBottom: "14px", paddingBottom: "10px",
+    borderBottom: "1px solid rgba(0,255,180,0.1)",
+  },
+  statusDot: {
+    width: 7, height: 7, borderRadius: "50%", background: "#00ffb4", flexShrink: 0,
+  },
+  brand:    { fontSize: "10px", color: "rgba(0,255,180,0.5)", letterSpacing: "2.5px", textTransform: "uppercase" },
+  blockNum: { fontSize: "9px", color: "rgba(0,255,180,0.3)", letterSpacing: "1px" },
+  statsRow: { display: "flex", gap: "8px", marginBottom: "14px" },
+  statBox:  {
+    flex: 1, background: "rgba(0,255,180,0.04)",
+    border: "0.5px solid rgba(0,255,180,0.1)", borderRadius: "6px", padding: "7px 10px",
+  },
+  statLabel:{ fontSize: "8px", color: "rgba(0,255,180,0.35)", letterSpacing: "1.5px", marginBottom: "3px" },
+  statValue:{ fontSize: "13px", fontWeight: 500 },
+  sectionLabel: {
+    fontSize: "9px", color: "rgba(0,255,180,0.3)",
+    letterSpacing: "2px", textTransform: "uppercase", marginBottom: "10px",
+  },
+  eventRow: {
+    marginBottom: "9px", paddingBottom: "9px",
+    borderBottom: "0.5px solid rgba(0,255,180,0.07)",
+  },
+  eventTop: { display: "flex", alignItems: "center", gap: "7px", marginBottom: "3px" },
+  badge: {
+    fontSize: "8px", letterSpacing: "1.5px",
+    border: "0.5px solid", borderRadius: "3px",
+    padding: "1px 5px", flexShrink: 0, opacity: 0.9,
+  },
+  timestamp:{ fontSize: "9px", color: "rgba(0,255,180,0.2)", marginLeft: "auto", flexShrink: 0 },
+  eventMsg: { fontSize: "11px", lineHeight: 1.55, letterSpacing: "0.3px" },
+  cursor:   { color: "#00ffb4", fontSize: "11px" },
+  footerStat:{ fontSize: "9px", color: "rgba(0,255,180,0.25)" },
+};
+
+const css = `
+  @keyframes blink    { 50%{opacity:0} }
+  @keyframes scanline { 0%{top:-10%} 100%{top:110%} }
+  @keyframes fadeSlide{ from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes pulse    { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  .tc-blink  { animation: blink     1s step-end infinite; }
+  .tc-fade   { animation: fadeSlide 0.25s ease forwards; }
+  .tc-pulse  { animation: pulse     2s ease-in-out infinite; }
+`;
