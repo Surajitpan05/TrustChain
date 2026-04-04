@@ -176,7 +176,7 @@ export default function TxFeed({ txFeed }) {
   }, [phase]);
 
   return (
-    <div style={S.txFeed}>
+    <div className="opacity-80" style={S.txFeed}>
       <style>{css}</style>
 
       {/* hash waterfall bg */}
@@ -292,54 +292,150 @@ export default function TxFeed({ txFeed }) {
 // ── local styles (extends S.txFeed from your style sheet) ────────────────────
 const sty = {
   hashBg: {
-    position: "absolute", inset: 0,
-    fontSize: "8px", color: "#00ffb4", opacity: 0.018,
-    lineHeight: 1.5, overflow: "hidden",
-    wordBreak: "break-all", padding: "8px",
-    pointerEvents: "none", whiteSpace: "pre-wrap",
+    position: "absolute",
+    inset: 0,
+    fontSize: "8px",
+    color: "#00ffb4",
+    opacity: 0.03,
+    lineHeight: 1.5,
+    overflow: "hidden",
+    wordBreak: "break-all",
+    padding: "8px",
+    pointerEvents: "none",
+    whiteSpace: "pre-wrap",
   },
+
   scanline: {
-    position: "absolute", left: 0, right: 0, height: "80px",
-    background: "linear-gradient(transparent,rgba(0,255,180,0.025),transparent)",
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: "80px",
+    background: "linear-gradient(transparent,rgba(0,255,180,0.03),transparent)",
     animation: "scanline 5s linear infinite",
-    pointerEvents: "none", zIndex: 0,
+    pointerEvents: "none",
+    zIndex: 0,
   },
-  inner:    { position: "relative", zIndex: 1 },
-  header:   {
-    display: "flex", alignItems: "center", justifyContent: "space-between",
-    marginBottom: "14px", paddingBottom: "10px",
-    borderBottom: "1px solid rgba(0,255,180,0.1)",
+
+  inner: {
+    position: "relative",
+    zIndex: 1,
+    background: "rgba(0, 15, 10, 0.15)",
+    backdropFilter: "blur(6px)",
+    WebkitBackdropFilter: "blur(6px)",
+    borderRadius: "10px",
+    padding: "12px"
   },
+
+  header: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: "14px",
+    paddingBottom: "10px",
+    borderBottom: "1px solid rgba(0,255,180,0.08)",
+  },
+
   statusDot: {
-    width: 7, height: 7, borderRadius: "50%", background: "#00ffb4", flexShrink: 0,
+    width: 7,
+    height: 7,
+    borderRadius: "50%",
+    background: "#00ffb4",
+    flexShrink: 0,
   },
-  brand:    { fontSize: "10px", color: "rgba(0,255,180,0.5)", letterSpacing: "2.5px", textTransform: "uppercase" },
-  blockNum: { fontSize: "9px", color: "rgba(0,255,180,0.3)", letterSpacing: "1px" },
-  statsRow: { display: "flex", gap: "8px", marginBottom: "14px" },
-  statBox:  {
-    flex: 1, background: "rgba(0,255,180,0.04)",
-    border: "0.5px solid rgba(0,255,180,0.1)", borderRadius: "6px", padding: "7px 10px",
+
+  brand: {
+    fontSize: "10px",
+    color: "rgba(0,255,180,0.6)",
+    letterSpacing: "2.5px",
+    textTransform: "uppercase"
   },
-  statLabel:{ fontSize: "8px", color: "rgba(0,255,180,0.35)", letterSpacing: "1.5px", marginBottom: "3px" },
-  statValue:{ fontSize: "13px", fontWeight: 500 },
+
+  blockNum: {
+    fontSize: "9px",
+    color: "rgba(0,255,180,0.45)",
+    letterSpacing: "1px"
+  },
+
+  statsRow: {
+    display: "flex",
+    gap: "8px",
+    marginBottom: "14px"
+  },
+
+  statBox: {
+    flex: 1,
+    background: "rgba(0,255,180,0.05)",
+    backdropFilter: "blur(4px)",
+    border: "0.5px solid rgba(0,255,180,0.12)",
+    borderRadius: "6px",
+    padding: "7px 10px",
+  },
+
+  statLabel: {
+    fontSize: "8px",
+    color: "rgba(0,255,180,0.45)",
+    letterSpacing: "1.5px",
+    marginBottom: "3px"
+  },
+
+  statValue: {
+    fontSize: "13px",
+    fontWeight: 500
+  },
+
   sectionLabel: {
-    fontSize: "9px", color: "rgba(0,255,180,0.3)",
-    letterSpacing: "2px", textTransform: "uppercase", marginBottom: "10px",
+    fontSize: "9px",
+    color: "rgba(0,255,180,0.45)",
+    letterSpacing: "2px",
+    textTransform: "uppercase",
+    marginBottom: "10px",
   },
+
   eventRow: {
-    marginBottom: "9px", paddingBottom: "9px",
-    borderBottom: "0.5px solid rgba(0,255,180,0.07)",
+    marginBottom: "9px",
+    paddingBottom: "9px",
+    borderBottom: "0.5px solid rgba(0,255,180,0.05)",
   },
-  eventTop: { display: "flex", alignItems: "center", gap: "7px", marginBottom: "3px" },
+
+  eventTop: {
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
+    marginBottom: "3px"
+  },
+
   badge: {
-    fontSize: "8px", letterSpacing: "1.5px",
-    border: "0.5px solid", borderRadius: "3px",
-    padding: "1px 5px", flexShrink: 0, opacity: 0.9,
+    fontSize: "8px",
+    letterSpacing: "1.5px",
+    border: "0.5px solid",
+    borderRadius: "3px",
+    padding: "1px 5px",
+    flexShrink: 0,
+    background: "rgba(0,255,180,0.05)"
   },
-  timestamp:{ fontSize: "9px", color: "rgba(0,255,180,0.2)", marginLeft: "auto", flexShrink: 0 },
-  eventMsg: { fontSize: "11px", lineHeight: 1.55, letterSpacing: "0.3px" },
-  cursor:   { color: "#00ffb4", fontSize: "11px" },
-  footerStat:{ fontSize: "9px", color: "rgba(0,255,180,0.25)" },
+
+  timestamp: {
+    fontSize: "9px",
+    color: "rgba(0,255,180,0.35)",
+    marginLeft: "auto",
+    flexShrink: 0
+  },
+
+  eventMsg: {
+    fontSize: "11px",
+    lineHeight: 1.55,
+    letterSpacing: "0.3px"
+  },
+
+  cursor: {
+    color: "#00ffb4",
+    fontSize: "11px"
+  },
+
+  footerStat: {
+    fontSize: "9px",
+    color: "rgba(0,255,180,0.4)"
+  },
 };
 
 const css = `
