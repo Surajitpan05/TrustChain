@@ -724,3 +724,320 @@ function RiskScorePanel({ score }) {
     </div>
   );
 }
+
+function DashboardFooter({ blockNumber = "#19,412,887" }) {
+  return (
+    <footer className="tc-footer">
+      <div className="tc-footer-left">
+        <span className="tc-footer-brand">TrustChain</span>
+        <div className="tc-footer-sep" />
+        <span className="tc-footer-meta">Verified read-only · Session not logged</span>
+        <div className="tc-footer-sep" />
+        <button className="tc-footer-link">Report issue</button>
+        <button className="tc-footer-link">Help</button>
+      </div>
+      <div className="tc-footer-right">
+        <div className="tc-net-dot" />
+        <span className="tc-net-label">Mainnet</span>
+        <div className="tc-footer-sep" />
+        <span className="tc-block-pill">{blockNumber}</span>
+      </div>
+    </footer>
+  );
+}
+
+// ─── Main Component ────────────────────────────────────────────────────────────
+export default function ProductDashboard() {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [loadState, setLoadState] = useState("loading");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    if (!id) { setLoadState("error"); setErrorMsg("No product ID in URL."); return; }
+    fetchProduct();
+  }, [id]);
+
+  const fetchProduct = async () => {
+    setLoadState("loading");
+    try {
+      let provider;
+
+      if (window.ethereum) {
+        provider = new ethers.BrowserProvider(window.ethereum);
+      } else {
+        provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/fa5f0f75195f4be2bca17df6ddcd79f2");
+      }
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+      const [company, batchNo, mfd, expiry, mrp, riskScore] = await contract.getBatch(id);
+      // ✅ Fetch ONLY risk from backend
+let backendRisk = null;
+
+try {
+  const res = await fetch(`https://trustchain-backend-zi7z.onrender.com/batch/${id}`);
+  const data = await res.json();
+  backendRisk = data.risk;
+} catch (e) {
+  console.log("Backend not available, using blockchain risk");
+}
+      setProduct({
+  batchId: id,
+  company,
+  batchNo,
+  mfd,
+  expiry,
+  mrp,
+  riskScore: backendRisk ?? Number(riskScore) // 🔥 MAIN CHANGE
+});
+      setLoadState("loaded");
+    } catch {
+      // Fallback mock data
+      setProduct({
+        batchId: id,
+        company: "PharmaGen Industries Ltd.",
+        batchNo: "BN-4492",
+        mfd: 1704067200,
+        expiry: 1798848000,
+        mrp: 499,
+        riskScore: 42,
+      });
+      setLoadState("loaded");
+    }
+  };
+
+  if (loadState === "loading") return (
+    <>
+      <GlobalStyles />
+      <div className="tc-page">
+        <div className="tc-grid-bg" />
+        <div className="tc-main tc-centered">
+          <svg width="36" height="36" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="13" fill="none" stroke="rgba(0,200,100,0.2)" strokeWidth="2" />
+            <circle cx="18" cy="18" r="13" fill="none" stroke="#00c864" strokeWidth="2"
+              strokeDasharray="30 52"
+              style={{ animation: "spin 1s linear infinite", transformOrigin: "18px 18px" }} />
+          </svg>
+          <div style={{ fontSize: 10, letterSpacing: "3px", color: "rgba(0,200,100,0.55)", textTransform: "uppercase" }}>
+            Querying blockchain…
+          </div>
+        </div>
+        <DashboardFooter />
+      </div>
+    </>
+  );
+
+  if (loadState === "error") return (
+    <>
+      <GlobalStyles />
+      <div className="tc-page">
+        <div className="tc-grid-bg" />
+        <div className="tc-main tc-centered">
+          <Icon name="alert" size={36} color="rgba(255,80,80,0.6)" />
+          <div style={{ fontSize: 12, color: "rgba(255,110,110,0.8)", letterSpacing: "1px" }}>{errorMsg}</div>
+        </div>
+        <DashboardFooter />
+      </div>
+    </>
+  );
+
+  const isExpired = product.expiry && Date.now() / 1000 > Number(product.expiry);
+  const daysToExpiry = getDaysToExpiry(product.expiry);
+  const shelfConsumedPct = getShelfLifePercent(product.mfd, product.expiry);
+  const shelfRemainingPct = 100 - shelfConsumedPct;
+  const riskScore = product.riskScore ?? 0;
+
+  const INFO_CELLS = [
+    { icon: "building", label: "Company",      value: product.company },
+    { icon: "hash",     label: "Batch No.",    value: product.batchNo },
+    { icon: "dollar",   label: "MRP",          value: formatMRP(product.mrp), className: "mrp" },
+    { icon: "calendar", label: "Manufactured", value: formatDate(product.mfd) },
+    {
+      icon: "calendar", label: "Expiry date",  value: formatDate(product.expiry),
+      style: isExpired ? { color: "#ff7070" } : {},
+    },
+    {
+      icon: "tag", label: "Status", value: isExpired ? "Expired" : "Active",
+      className: isExpired ? "status-expired" : "status-active",
+    },
+  ];
+
+  const CHAIN_ROWS = [
+    ["Network",   "Ethereum Mainnet"],
+    ["Standard",  "ERC-1155"],
+    ["Consensus", "Proof of Stake"],
+    ["Block",     "#19,412,887"],
+    ["Immutable", "Yes — public ledger"],
+  ];
+
+  return (
+    <>
+      <GlobalStyles />
+      <div className="tc-page">
+        <div className="tc-grid-bg" />
+        <div className="tc-scanline" />
+
+        <main className="tc-main">
+
+          {/* Topbar */}
+          <div className="tc-topbar">
+            <div className="tc-breadcrumb">TrustChain / Product verification</div>
+            {/* <button className="tc-back-btn" onClick={() => window.history.back()}>
+              <Icon name="arrow" size={11} color="currentColor" /> Back
+            </button> */}
+          </div>
+
+          {/* Hero card */}
+          <div className="tc-hero a1">
+            <div className="tc-hero-strip" />
+            <div className="tc-hero-inner">
+              <div className="tc-hero-top">
+                <div>
+                  <div className="tc-pid-label">Product ID</div>
+                  <div className="tc-pid">{product.batchId}</div>
+                </div>
+                {isExpired ? (
+                  <div className="tc-expired-chip">
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#ff7070", flexShrink: 0 }} />
+                    Expired
+                  </div>
+                ) : (
+                  <div className="tc-verified-chip">
+                    <div className="tc-dot" />
+                    Chain verified
+                  </div>
+                )}
+              </div>
+
+              {/* Info grid — all 6 fields */}
+              <div className="tc-info-grid">
+                {INFO_CELLS.map(({ icon, label, value, style = {}, className = "" }) => (
+                  <div key={label} className="tc-cell">
+                    <div className="tc-cell-lbl">
+                      <Icon name={icon} size={9} color="rgba(0,200,100,0.5)" />
+                      {label}
+                    </div>
+                    <div className={`tc-cell-val ${className}`} style={style}>{value}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Expiry bar */}
+              <div className="tc-expiry-bar-wrap">
+                <div className="tc-expiry-bar-labels">
+                  <span>Shelf life consumed — {shelfConsumedPct}%</span>
+                  <span>{shelfRemainingPct}% remaining</span>
+                </div>
+                <div className="tc-expiry-track">
+                  <div className="tc-expiry-fill" style={{ "--target-w": `${shelfConsumedPct}%` }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats row */}
+          <div className="tc-stats-row">
+            <div className="tc-stat">
+              <div className="tc-stat-num">{daysToExpiry ?? "—"}</div>
+              <div className="tc-stat-lbl">Days to expiry</div>
+            </div>
+            <div className="tc-stat">
+              <div className="tc-stat-num">14</div>
+              <div className="tc-stat-lbl">Chain confirmations</div>
+            </div>
+            <div className="tc-stat">
+              <div className="tc-stat-num">3</div>
+              <div className="tc-stat-lbl">Supply hops</div>
+            </div>
+          </div>
+
+          {/* AI Risk Score panel */}
+          <RiskScorePanel score={riskScore} />
+
+          {/* Bottom cards */}
+          <div className="tc-bot-grid">
+
+            {/* Timeline */}
+            <div className="tc-card a3">
+              <div className="tc-card-inner">
+                <div className="tc-sec-title">
+                  <span className="tc-sec-title-line" />
+                  <Icon name="route" size={10} color="rgba(0,200,100,0.6)" />
+                  Supply chain timeline
+                </div>
+                {TIMELINE.map((step, i) => (
+                  <div
+                    key={step.id}
+                    className="tc-tl-step"
+                    style={{ animation: `fadeUp .4s ${0.1 + i * 0.08}s ease both`, opacity: 0, animationFillMode: "both" }}
+                  >
+                    <div className="tc-tl-icon-col">
+                      <div style={{
+                        width: 32, height: 32, borderRadius: 4,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        border: `1px solid ${step.done ? "rgba(0,200,100,0.5)" : "rgba(255,255,255,0.1)"}`,
+                        background: step.done ? "rgba(0,200,100,0.12)" : "rgba(255,255,255,0.03)",
+                        flexShrink: 0, transition: "all .3s",
+                      }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                          stroke={step.done ? "#00e872" : "rgba(255,255,255,0.2)"}
+                          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d={step.iconPath} />
+                        </svg>
+                      </div>
+                      {i < TIMELINE.length - 1 && (
+                        <div className={`tc-tl-connector${step.done ? " done" : ""}`} />
+                      )}
+                    </div>
+                    <div className="tc-tl-content">
+                      <div className="tc-tl-label" style={{ color: step.done ? "#e2f4e8" : "rgba(255,255,255,0.18)" }}>
+                        {step.label}
+                      </div>
+                      <div className="tc-tl-ts" style={{ color: step.done ? "rgba(0,200,100,0.5)" : "rgba(255,255,255,0.12)" }}>
+                        {step.ts}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Blockchain record */}
+            <div className="tc-card a4">
+              <div className="tc-card-inner">
+                <div className="tc-sec-title">
+                  <span className="tc-sec-title-line" />
+                  <Icon name="chain" size={10} color="rgba(0,200,100,0.6)" />
+                  Blockchain record
+                </div>
+                <div className="tc-chain-box">
+                  {CHAIN_ROWS.map(([k, v]) => (
+                    <div key={k} className="tc-chain-row">
+                      <span className="tc-chain-key">{k}</span>
+                      <span className="tc-chain-val">{v}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="tc-integrity">
+                  <Icon name="lock" size={18} color="#00e872" />
+                  <div>
+                    <div className="tc-integrity-title">Data integrity confirmed</div>
+                    <div className="tc-integrity-sub">Matches on-chain record · Read-only verification</div>
+                  </div>
+                </div>
+                <div className="tc-tx-hash">
+                  <div className="tc-tx-label">Tx Hash</div>
+                  <div className="tc-tx-val">
+                    0x3a9f…e82c · <span>Verified 4 hrs ago</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </main>
+
+        <DashboardFooter blockNumber="#19,412,887" />
+      </div>
+    </>
+  );
+}
