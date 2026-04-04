@@ -98,3 +98,103 @@ export default function TxFeed({ txFeed }) {
   useEffect(() => {
     const timers = [];
     BOOT_LINES.forEach((line, i) => {
+      const t = setTimeout(() => {
+        setBootVisible((prev) => [...prev, line]);
+      }, line.ms);
+      timers.push(t);
+    });
+    const done = setTimeout(() => {
+      setPhase("live");
+      setStats({ peers: 12, pending: 1247, verified: 0 });
+    }, 3200);
+    timers.push(done);
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  // ── live feed from txFeed prop ──────────────────────────────────────────────
+  useEffect(() => {
+    if (phase !== "live" || txFeed.length === 0) return;
+    const latest = txFeed[0];
+    // Map incoming tx to TrustChain event format
+    const ev = {
+      badge: "TX",
+      color: "#00ffb4",
+      msg: latest.msg,
+      visibleText: "",
+      key: Date.now(),
+    };
+    setEvents((prev) => [ev, ...prev.slice(0, 8)]);
+
+    let i = 0;
+    const iv = setInterval(() => {
+      i++;
+      setEvents((prev) => {
+        const next = [...prev];
+        if (next[0]) next[0] = { ...next[0], visibleText: latest.msg.slice(0, i) };
+        return next;
+      });
+      if (i >= latest.msg.length) clearInterval(iv);
+    }, 16);
+    return () => clearInterval(iv);
+  }, [txFeed, phase]);
+
+  // ── auto-generate demo events when no txFeed ────────────────────────────────
+  useEffect(() => {
+    if (phase !== "live") return;
+    const fire = () => {
+      const ev = EVENT_TYPES[Math.random() * EVENT_TYPES.length | 0]();
+      setBlockNum((b) => b + 1);
+      setStats((s) => ({
+        peers: s.peers,
+        pending: Math.max(0, s.pending + (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 3 | 0)),
+        verified: ev.badge === "VERIFIED" || ev.badge === "QR SCAN" ? s.verified + 1 : s.verified,
+      }));
+      setEvents((prev) => [
+        { ...ev, visibleText: "", key: Date.now() + Math.random() },
+        ...prev.slice(0, 8),
+      ]);
+      // typewriter on newest entry
+      let i = 0;
+      const iv = setInterval(() => {
+        i++;
+        setEvents((prev) => {
+          const next = [...prev];
+          if (next[0]) next[0] = { ...next[0], visibleText: ev.msg.slice(0, i) };
+          return next;
+        });
+        if (i >= ev.msg.length) clearInterval(iv);
+      }, 14);
+    };
+
+    fire();
+    const schedNext = () => {
+      const t = setTimeout(() => { fire(); schedNext(); }, Math.random() * 2200 + 800);
+      return t;
+    };
+    const t = schedNext();
+    return () => clearTimeout(t);
+  }, [phase]);
+
+  return (
+    <div style={S.txFeed}>
+      <style>{css}</style>
+
+      {/* hash waterfall bg */}
+      <div ref={bgRef} style={sty.hashBg} />
+      {/* scanline */}
+      <div style={sty.scanline} />
+
+      <div style={sty.inner}>
+        {/* ── header bar ── */}
+        <div style={sty.header}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={sty.statusDot} className="tc-pulse" />
+            <span style={sty.brand}>TrustChain</span>
+          </div>
+          <span style={sty.blockNum}>
+            BLOCK #{blockNum.toLocaleString()}
+          </span>
+        </div>
+
+        {/* ── stats row ── */}
+        <div style={sty.statsRow}>
