@@ -45,3 +45,54 @@ export function buildWarehouse(M, sh, mkMesh) {
     addS(new THREE.BoxGeometry(0.5 * BS, 0.38 * BS, 0.07), wm, i * 1.0 * BS, 1.1 * BS,  1.71 * BS);
     addS(new THREE.BoxGeometry(0.56 * BS, 0.05, 0.14), M(0x041008, 0.6, 0.4), i * 1.0 * BS, 0.87 * BS, 1.73 * BS);
   }
+
+  // ── Back windows (amber) ─────────────────────────────────────────────────
+  for (let i = -2; i <= 2; i++) {
+    const wm2 = new THREE.MeshStandardMaterial({ color: 0xffbb55, roughness: 0.05, metalness: 0.8, emissive: 0x442200, emissiveIntensity: 0.55 });
+    addS(new THREE.BoxGeometry(0.5 * BS, 0.38 * BS, 0.07), wm2, i * 1.0 * BS, 1.1 * BS, -1.71 * BS);
+  }
+
+  // ── Pillars (front & back) ───────────────────────────────────────────────
+  for (let i = -2; i <= 2; i++) {
+    addS(new THREE.BoxGeometry(0.17 * BS, 4.0 * BS, 0.17),
+      new THREE.MeshStandardMaterial({ color: 0x0a2018, roughness: 0.2, metalness: 0.7 }),
+      i * 1.2 * BS, 0.12 * BS,  1.73 * BS);
+    addS(new THREE.BoxGeometry(0.17 * BS, 4.0 * BS, 0.17),
+      new THREE.MeshStandardMaterial({ color: 0x0a2018, roughness: 0.2, metalness: 0.7 }),
+      i * 1.2 * BS, 0.12 * BS, -1.73 * BS);
+  }
+
+  // ── EXIT door — LEFT ─────────────────────────────────────────────────────
+  const exitDoorMat = new THREE.MeshStandardMaterial({
+    color: 0x00ff88, roughness: 0.08, emissive: 0x00ff88, emissiveIntensity: 1.3, metalness: 0.5,
+  });
+  addS(new THREE.BoxGeometry(0.08, 1.6 * BS, 1.2 * BS), exitDoorMat, -3.1 * BS, -0.18 * BS, 0);
+  const agL = new THREE.CylinderGeometry(0.6 * BS, 0.6 * BS, 0.08, 20, 1, false, 0, Math.PI);
+  agL.rotateZ(-Math.PI / 2);
+  addS(agL, exitDoorMat, -3.1 * BS, 0.6 * BS, 0);
+  const glowMatL = new THREE.MeshStandardMaterial({ color: 0x00ff99, emissive: 0x00ff99, emissiveIntensity: 2.4, roughness: 0.06 });
+  addS(new THREE.BoxGeometry(0.08, 1.6 * BS + 1.2 * BS * 0.4, 0.08), glowMatL, -3.1 * BS, 0.12 * BS,  0.62 * BS);
+  addS(new THREE.BoxGeometry(0.08, 1.6 * BS + 1.2 * BS * 0.4, 0.08), glowMatL, -3.1 * BS, 0.12 * BS, -0.62 * BS);
+
+  // ── ENTRY door — RIGHT ───────────────────────────────────────────────────
+  const entryDoorMat = new THREE.MeshStandardMaterial({
+    color: 0xcc8822, roughness: 0.18, emissive: 0xaa5500, emissiveIntensity: 0.9, metalness: 0.35,
+  });
+  addS(new THREE.BoxGeometry(0.08, 1.6 * BS, 1.2 * BS), entryDoorMat, 3.1 * BS, -0.18 * BS, 0);
+  const agR = new THREE.CylinderGeometry(0.6 * BS, 0.6 * BS, 0.08, 20, 1, false, 0, Math.PI);
+  agR.rotateZ(Math.PI / 2);
+  addS(agR, entryDoorMat, 3.1 * BS, 0.6 * BS, 0);
+  const glowMatR = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0xffaa44, emissiveIntensity: 1.6, roughness: 0.06 });
+  addS(new THREE.BoxGeometry(0.08, 1.6 * BS + 1.2 * BS * 0.4, 0.08), glowMatR, 3.1 * BS, 0.12 * BS,  0.62 * BS);
+  addS(new THREE.BoxGeometry(0.08, 1.6 * BS + 1.2 * BS * 0.4, 0.08), glowMatR, 3.1 * BS, 0.12 * BS, -0.62 * BS);
+
+  // ── Sign panel + frame + canvas sign ────────────────────────────────────
+  addS(
+    new THREE.BoxGeometry(4.4 * BS, 0.75 * BS, 0.12),
+    new THREE.MeshStandardMaterial({ color: 0x000d07, roughness: 0.15, metalness: 0.8, emissive: 0x00ff88, emissiveIntensity: 0.07 }),
+    0, 1.82 * BS, 1.74 * BS
+  );
+  const frameMat = new THREE.MeshStandardMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 1.9, roughness: 0.04 });
+  addS(new THREE.BoxGeometry(4.4 * BS, 0.045, 0.13), frameMat, 0, 1.82 * BS + 0.375 * BS, 1.75 * BS);
+  addS(new THREE.BoxGeometry(4.4 * BS, 0.045, 0.13), frameMat, 0, 1.82 * BS - 0.375 * BS, 1.75 * BS);
+  sg.add(makeWarehouseSign(BS));
