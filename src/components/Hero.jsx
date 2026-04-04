@@ -24,7 +24,7 @@ export default function Hero() {
         {/* Eyebrow */}
         <div style={S.eyebrow}>
           <div style={S.eyebrowDot} />
-          Live on SepoliaETH &nbsp;·&nbsp; 99.9% Uptime
+          Live on Algorand TestNet &nbsp;·&nbsp; 99.9% Uptime
         </div>
 
         {/* Heading */}

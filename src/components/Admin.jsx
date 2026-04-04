@@ -812,7 +812,7 @@ pushLog("Confirmed ✓  Batch immortalised on-chain.", "ok");
             </div>
             <div className="tc-net-badge">
               <div className="tc-net-dot" />
-              Ethereum SepoliaETH
+              Algorand TestNet
             </div>
           </div>
 
@@ -874,7 +874,7 @@ pushLog("Confirmed ✓  Batch immortalised on-chain.", "ok");
                           <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
                           <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
                         </svg>
-                        Register on Blockchain
+                        Register on Algorand TestNet
                       </>
                   }
                 </button>
@@ -984,7 +984,7 @@ pushLog("Confirmed ✓  Batch immortalised on-chain.", "ok");
 
                 <div className="tc-meta-rows">
                   {[
-                    ["Network",     "Ethereum SepoliaETH"],
+                    ["Network",     "Algorand TestNet"],
                     ["Standard",    "ERC-1155"],
                     ["Immutability","Guaranteed"],
                     ["Audit trail", "On-chain"],

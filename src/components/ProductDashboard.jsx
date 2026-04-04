@@ -835,7 +835,7 @@ try {
               style={{ animation: "spin 1s linear infinite", transformOrigin: "18px 18px" }} />
           </svg>
           <div style={{ fontSize: 10, letterSpacing: "3px", color: "rgba(0,200,100,0.55)", textTransform: "uppercase" }}>
-            Querying blockchain…
+            Querying Algorand TestNet…
           </div>
         </div>
         <DashboardFooter />
@@ -879,7 +879,7 @@ try {
   ];
 
   const CHAIN_ROWS = [
-    ["Network",   "Ethereum SepoliaETH"],
+    ["Network",   "Algorand TestNet"],
     ["Standard",  "ERC-1155"],
     ["Consensus", "Proof of Stake"],
     ["Block",     "#19,412,887"],
@@ -1018,13 +1018,13 @@ try {
               </div>
             </div>
 
-            {/* Blockchain record */}
+            {/* Algorand TestNet record */}
             <div className="tc-card a4">
               <div className="tc-card-inner">
                 <div className="tc-sec-title">
                   <span className="tc-sec-title-line" />
                   <Icon name="chain" size={10} color="rgba(0,200,100,0.6)" />
-                  Blockchain record
+                  Algorand TestNet record
                 </div>
                 <div className="tc-chain-box">
                   {CHAIN_ROWS.map(([k, v]) => (
