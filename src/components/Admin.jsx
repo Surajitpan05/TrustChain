@@ -305,3 +305,61 @@ setStatus("success");
       setErrorMsg(msg);
       pushLog(`Error: ${msg.slice(0, 60)}`, "err");
       setStatus("error");
+    }
+  };
+  
+  const productUrl = registeredId ? `${window.location.origin}/product/${registeredId}` : "";
+
+  const getQRSvgString = () => {
+    const el = document.querySelector("#tc-qr-target svg");
+    if (!el) return null;
+    // Clone and ensure explicit width/height for canvas rendering
+    const clone = el.cloneNode(true);
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    if (!clone.getAttribute("width"))  clone.setAttribute("width",  "200");
+    if (!clone.getAttribute("height")) clone.setAttribute("height", "200");
+    return new XMLSerializer().serializeToString(clone);
+  };
+
+  const downloadQRpng = useCallback(() => {
+    const svgStr = getQRSvgString();
+    if (!svgStr) return;
+    const SIZE = 512;
+    const canvas = document.createElement("canvas");
+    canvas.width = SIZE; canvas.height = SIZE;
+    const ctx = canvas.getContext("2d");
+    const svgBlob = new Blob([svgStr], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(svgBlob);
+    const img = new Image();
+    img.onload = () => {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, SIZE, SIZE);
+      ctx.drawImage(img, 0, 0, SIZE, SIZE);
+      URL.revokeObjectURL(url);
+      canvas.toBlob((blob) => {
+        const a = document.createElement("a");
+        a.download = `trustchain-qr-${registeredId}.png`;
+        a.href = URL.createObjectURL(blob);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }, "image/png");
+    };
+    img.onerror = () => URL.revokeObjectURL(url);
+    img.src = url;
+  }, [registeredId]);
+
+  const downloadQRsvg = useCallback(() => {
+    const svgStr = getQRSvgString();
+    if (!svgStr) return;
+    const blob = new Blob([svgStr], { type: "image/svg+xml;charset=utf-8" });
+    const a = document.createElement("a");
+    a.download = `trustchain-qr-${registeredId}.svg`;
+    a.href = URL.createObjectURL(blob);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }, [registeredId]);
+
+  const logColor = (t) => t === "ok" ? "#00e872" : t === "err" ? "#ff7070" : "rgba(226,244,232,0.38)";
