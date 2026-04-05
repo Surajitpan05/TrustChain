@@ -227,8 +227,8 @@ const TIMELINE = [
   { id: "manufactured", label: "Manufactured",    iconPath: "M2 20V8l7-4v4l7-4v16H2z", done: true,  ts: "Jan 1, 2024" },
   { id: "qc",           label: "Quality checked", iconPath: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z", done: true, ts: "Jan 3, 2024" },
   { id: "shipped",      label: "Shipped",          iconPath: "M1 3h15v13H1z M16 8h4l3 3v5h-7V8z M5.5 21a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z M18.5 21a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z", done: true, ts: "Jan 6, 2024" },
-  { id: "in_transit",   label: "In transit",       iconPath: "M5 12h14M12 5l7 7-7 7", done: false, ts: "Pending" },
-  { id: "delivered",    label: "Delivered",        iconPath: "M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01 9 11.01", done: false, ts: "Pending" },
+  { id: "in_transit",   label: "In transit",       iconPath: "M5 12h14M12 5l7 7-7 7", done: true, ts: "Pending" },
+  { id: "delivered",    label: "Delivered",        iconPath: "M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01 9 11.01", done: true, ts: "Pending" },
 ];
 
 function Icon({ name, size = 18, color = "currentColor" }) {
@@ -922,7 +922,7 @@ setProduct({
                 ) : (
                   <div className="tc-verified-chip">
                     <div className="tc-dot" />
-                    Chain verified
+                    TrustChain verified
                   </div>
                 )}
               </div>

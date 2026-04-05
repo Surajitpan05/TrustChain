@@ -847,6 +847,8 @@ pushLog("Confirmed ✓  Batch immortalised on-chain.", "ok");
   <option value="">Select Sensor</option>
   <option value="sensor1">Sensor 1</option>
   <option value="sensor2">Sensor 2</option>
+  <option value="sensor3">Sensor 3</option>
+  <option value="sensor4">Sensor 4</option>
 </select>
 ) : (
   <input
