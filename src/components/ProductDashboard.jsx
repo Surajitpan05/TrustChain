@@ -794,7 +794,7 @@ setProduct({
   mfd: product.mfd,
   expiry: product.expiry,
   mrp: product.mrp,
-  riskScore: parseInt(backendRisk, 10)
+  riskScore: min(parseInt(backendRisk, 10),100)
 });
       // ✅ Fetch ONLY risk from backend
 
